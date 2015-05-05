@@ -1,0 +1,31 @@
+# Ways to implement a generic automation layer, by abstraction level
+
+
+## 0. Webcam and actuated rubber finger
+
+Works even in non-electronic games and looks hilarious and/or scary.
+
+
+## 1. Read window pixels and send OS keyboard events
+
+Works on any game, but is highly OS dependent and requires low level APIs.
+
+
+## 2. Browser plugin
+
+Less work per game, but drastically increases the solution size and difficults distribution.
+
+
+## 3. Read canvas pixels and send JS keyboard events
+
+Most of the effort will be spent interpreting the pixels. It's very flexible, but the effort will likely not be worth it.
+
+
+## 4. Intercept calls to canvas (chosen method) and send JS keyboard events
+
+Most games call canvas.getContext("2d").drawMeSomething. If you just witch the drawMeSomething function to something else, you can intercept each draw and get more fine grained image interpretation. Coupled with caller analysis, you can group drawings, effectively automating the large effort required to interpret the pixels.
+
+
+## 5. Modify source code
+
+Much less fun, much more cheat-y, and requires manual intervention with programming knowledge. Also, it's hard to get variables from inside closures.
