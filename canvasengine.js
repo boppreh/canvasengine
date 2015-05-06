@@ -44,6 +44,26 @@ function frameClean() {
 }
 canvas.requestAnimationFrame ? canvas.requestAnimationFrame(frameClean)  : setInterval(frameClean, 1000 / 60);
 
+function moveTo(dx, dy) {
+  var angle = Math.atan2(dy, dx);
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+  var x = Math.cos(angle) * width;
+  var y = Math.sin(angle) * width;
+  canvas.onmousemove({clientX: x, clientY: y});
+}
+
+function update() {
+  var player = world[2][0];
+
+  var smallest = {size: Infinity};
+  for each (var other in world[1]) {
+    if (other && other.size && other.size < smallest.size) {
+      smallest = other;
+    }
+  }
+  moveTo(smallest.x - player.x, smallest.y - player.y);
+}
 
 var saved = {};
 var hooks = {};
