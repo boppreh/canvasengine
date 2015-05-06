@@ -60,10 +60,11 @@ for (var attributeName in context) {
   }
 }
 
-
-var obj;
 hooks["save"] = function() {
-  obj = {minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity};
+  obj.minX = Infinity;
+  obj.maxX = -Infinity;
+  obj.minY = Infinity;
+  obj.maxY = -Infinity;
 }
 hooks["moveTo"] = function(x, y) {
   obj.maxX = Math.max(obj.maxX, x);
@@ -71,8 +72,24 @@ hooks["moveTo"] = function(x, y) {
   obj.maxY = Math.max(obj.maxY, y);
   obj.minY = Math.min(obj.minY, y);
 }
+hooks["drawImage"] = function(image, x, y, width, height) {
+  hooks["moveTo"](x, y);
+  if (width) {
+    hooks["moveTo"](x + width, y + height || width);
+  }
+}
 hooks["lineTo"] = hooks["moveTo"];
 hooks["restore"] = function() {
   context.globalAlpha = 0.2;
-  context.fillRect(obj.minX, obj.minY, obj.maxX - obj.minX, obj.maxY - obj.minY);
+  obj.width = obj.maxX - obj.minX;
+  obj.height = obj.maxY - obj.minY;
+  obj.size = (obj.width + obj.height) / 2;
+  obj.x = (obj.minX + obj.maxX) / 2;
+  obj.y = (obj.minY + obj.maxY) / 2;
+  var d = context.lineWidth;
+  context.fillRect(obj.minX - d, obj.minY - d, obj.width + 2 * d, obj.height + 2 * d);
+}
+
+function update() {
+
 }
