@@ -29,7 +29,7 @@ var canvas = document.getElementsByTagName('canvas')[0];
 var context = canvas.getContext('2d');
 
 var world = [];
-var obj = {};
+var currentObj = {};
 var startingTransformation = {scale: 1, offsetX: 0, offsetY: 0};
 var transformations = [startingTransformation];
 function frameClean() {
@@ -51,6 +51,7 @@ function moveTo(dx, dy) {
 }
 
 function update() {
+    /*
     var player = world[2][0];
 
     var smallest = {size: Infinity};
@@ -60,6 +61,23 @@ function update() {
         }
     }
     moveTo(player.x, smallest.x, player.y, smallest.y);
+    */
+}
+
+function render(obj) {
+    var d = context.lineWidth;
+    //context.fillRect(currentObj.minX - d / 2, currentObj.minY - d / 2, currentObj.width + d, currentObj.height + d);
+
+    var mass = Math.round(currentObj.size / 3);
+    if (mass > 10 && mass < 300) {
+        context.globalAlpha = 0.9;
+        context.font = mass + "px Ubuntu";
+        context.fillStyle = "#FFFFFF";
+        context.strokeStyle = "#000000";
+        context.lineWidth = 3;
+        context.strokeText(mass, currentObj.x, currentObj.y + currentObj.size / 2);
+        context.fillText(mass, currentObj.x, currentObj.y + currentObj.size / 2);
+    }
 }
 
 var saved = {};
@@ -84,8 +102,8 @@ for (var attributeName in context) {
                     if (!world[callerIndex]) {
                         world[callerIndex] = []
                     }
-                    world[callerIndex].push(obj);
-                    obj = {};
+                    world[callerIndex].push(currentObj);
+                    currentObj = {};
                 }
                 saved[attributeName].apply(context, arguments);
             }
@@ -103,25 +121,25 @@ hooks["translate"] = function(x, y) {
     t.offsetY += y * t.scale;
 }
 hooks["save"] = function() {
-    obj = {};
-    obj.minX = Infinity;
-    obj.maxX = -Infinity;
-    obj.minY = Infinity;
-    obj.maxY = -Infinity;
+    currentObj = {};
+    currentObj.minX = Infinity;
+    currentObj.maxX = -Infinity;
+    currentObj.minY = Infinity;
+    currentObj.maxY = -Infinity;
 
     var t = transformations[transformations.length - 1];
     transformations.push({scale: t.scale, offsetX: t.offsetX, offsetY: t.offsetY});
 }
 hooks["moveTo"] = function(x, y) {
     var t = transformations[transformations.length - 1];
-    console.log(x, y, t.scale);
+    //console.log(x, y, t.scale);
     //x = x * t.scale + t.offsetX;
     //y = y * t.scale + t.offsetY;
 
-    obj.maxX = Math.max(obj.maxX, x);
-    obj.minX = Math.min(obj.minX, x);
-    obj.maxY = Math.max(obj.maxY, y);
-    obj.minY = Math.min(obj.minY, y);
+    currentObj.maxX = Math.max(currentObj.maxX, x);
+    currentObj.minX = Math.min(currentObj.minX, x);
+    currentObj.maxY = Math.max(currentObj.maxY, y);
+    currentObj.minY = Math.min(currentObj.minY, y);
 }
 hooks["drawImage"] = function(image, x, y, width, height) {
     hooks["moveTo"](x, y);
@@ -132,13 +150,13 @@ hooks["drawImage"] = function(image, x, y, width, height) {
 hooks["lineTo"] = hooks["moveTo"];
 hooks["restore"] = function() {
     context.globalAlpha = 0.2;
-    obj.width = obj.maxX - obj.minX;
-    obj.height = obj.maxY - obj.minY;
-    obj.size = (obj.width + obj.height) / 2;
-    obj.x = (obj.minX + obj.maxX) / 2;
-    obj.y = (obj.minY + obj.maxY) / 2;
-    var d = context.lineWidth;
-    context.fillRect(obj.minX - d / 2, obj.minY - d / 2, obj.width + d, obj.height + d);
+    currentObj.width = currentObj.maxX - currentObj.minX;
+    currentObj.height = currentObj.maxY - currentObj.minY;
+    currentObj.size = (currentObj.width + currentObj.height) / 2;
+    currentObj.x = (currentObj.minX + currentObj.maxX) / 2;
+    currentObj.y = (currentObj.minY + currentObj.maxY) / 2;
+
+    render(currentObj);
 
     transformations.pop();
 }
