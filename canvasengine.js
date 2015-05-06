@@ -1,4 +1,5 @@
-"use strict";
+// Not available because we need 
+// "use strict";
 
 function getRandomColor() {
     var letters = '0123456789ABCDEF'.split('');
@@ -15,8 +16,17 @@ for (var i = 0; i < 10000; i++) {
 }
 
 
-var canvas = document.getElementsByTagName('canvas')[0]
+var canvas = document.getElementsByTagName('canvas')[0];
 var context = canvas.getContext('2d');
+
+var world = {};
+var obj;
+function frameClean() {
+  update();
+  world = {};
+}
+canvas.requestAnimationFrame ? canvas.requestAnimationFrame(frameClean)  : setInterval(frameClean, 1000 / 60);
+
 
 var saved = {};
 var hooks = {};
@@ -31,6 +41,16 @@ for (var attributeName in context) {
     // code before each call.
     (function(attributeName) {
       context[attributeName] = function() {
+
+        if (attributeName == "save") {
+          caller = arguments.callee.caller.toString()
+          if (!world[caller]) {
+            world[caller] = []
+          }
+          obj = {};
+          world[caller].push(obj);
+        }
+        
         if (hooks[attributeName]) {
           hooks[attributeName].apply(context, arguments);
         }
