@@ -103,3 +103,11 @@ hooks["restore"] = function() {
 function update() {
 
 }
+
+function putMouseAngle(angle) {
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+  var x = Math.cos(angle) * width;
+  var y = Math.sin(angle) * width;
+  canvas.onmousemove({clientX: x, clientY: y});
+}
