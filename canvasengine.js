@@ -30,17 +30,14 @@ var context = canvas.getContext('2d');
 
 var world = [];
 var obj = {};
-var currentScale = 1;
-var offsetX = 0;
-var offsetY = 0;
+var startingTransformation = {scale: 1, offsetX: 0, offsetY: 0};
+var transformations = [startingTransformation];
 function frameClean() {
   if (world.length > 0) {
     update();
   }
   world = [];
-  currentScale = 1;
-  offsetX = 0;
-  offsetY = 0;
+  var transformations = [startingTransformation];
 }
 canvas.requestAnimationFrame ? canvas.requestAnimationFrame(frameClean)  : setInterval(frameClean, 1000 / 60);
 
@@ -62,7 +59,7 @@ function update() {
       smallest = other;
     }
   }
-  moveTo(smallest.x - player.x, smallest.y - player.y);
+  moveTo(player.x, smallest.x, player.y, smallest.y);
 }
 
 var saved = {};
@@ -98,11 +95,12 @@ for (var attributeName in context) {
 
 hooks["scale"] = function(multiplier) {
   // No support for asymmetric scaling.
-  currentScale *= multiplier;
+  transformations[transformations.length - 1].scale *= multiplier;
 }
 hooks["translate"] = function(x, y) {
-  offsetX += x * currentScale;
-  offsetY += y * currentScale;
+  var t = transformations[transformations.length - 1];
+  t.offsetX += x * t.scale;
+  t.offsetY += y * t.scale;
 }
 hooks["save"] = function() {
   obj = {};
@@ -110,8 +108,16 @@ hooks["save"] = function() {
   obj.maxX = -Infinity;
   obj.minY = Infinity;
   obj.maxY = -Infinity;
+
+  var t = transformations[transformations.length - 1];
+  transformations.push({scale: t.scale, offsetX: t.offsetX, offsetY: t.offsetY});
 }
 hooks["moveTo"] = function(x, y) {
+  var t = transformations[transformations.length - 1];
+  console.log(x, y, t.scale);
+  x = x * t.scale + t.offsetX;
+  y = y * t.scale + t.offsetY;
+
   obj.maxX = Math.max(obj.maxX, x);
   obj.minX = Math.min(obj.minX, x);
   obj.maxY = Math.max(obj.maxY, y);
@@ -134,6 +140,5 @@ hooks["restore"] = function() {
   var d = context.lineWidth;
   context.fillRect(obj.minX - d / 2, obj.minY - d / 2, obj.width + d, obj.height + d);
 
-  obj.screenX = (obj.x * currentScale) - offsetX;
-  obj.screenY = (obj.y * currentScale) - offsetY;
+  transformations.pop();
 }
