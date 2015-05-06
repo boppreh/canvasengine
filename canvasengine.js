@@ -115,8 +115,8 @@ hooks["save"] = function() {
 hooks["moveTo"] = function(x, y) {
   var t = transformations[transformations.length - 1];
   console.log(x, y, t.scale);
-  x = x * t.scale + t.offsetX;
-  y = y * t.scale + t.offsetY;
+  //x = x * t.scale + t.offsetX;
+  //y = y * t.scale + t.offsetY;
 
   obj.maxX = Math.max(obj.maxX, x);
   obj.minX = Math.min(obj.minX, x);
