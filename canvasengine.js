@@ -30,9 +30,15 @@ var context = canvas.getContext('2d');
 
 var world = [];
 var obj;
+var currentScale = 1;
+var offsetX = 0;
+var offsetY = 0;
 function frameClean() {
   update();
   world = {};
+  currentScale = 1;
+  offsetX = 0;
+  offsetY = 0;
 }
 canvas.requestAnimationFrame ? canvas.requestAnimationFrame(frameClean)  : setInterval(frameClean, 1000 / 60);
 
@@ -70,6 +76,14 @@ for (var attributeName in context) {
   }
 }
 
+hooks["scale"] = function(multiplier) {
+  // No support for asymmetric scaling.
+  currentScale *= multiplier;
+}
+hooks["translate"] = function(x, y) {
+  offsetX += x * currentScale;
+  offsetY += y * currentScale;
+}
 hooks["save"] = function() {
   obj.minX = Infinity;
   obj.maxX = -Infinity;
@@ -98,6 +112,9 @@ hooks["restore"] = function() {
   obj.y = (obj.minY + obj.maxY) / 2;
   var d = context.lineWidth;
   context.fillRect(obj.minX - d, obj.minY - d, obj.width + 2 * d, obj.height + 2 * d);
+
+  obj.screenX = (obj.x * currentScale) - offsetX;
+  obj.screenY = (obj.y * currentScale) - offsetY;
 }
 
 function update() {
