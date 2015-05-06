@@ -29,13 +29,15 @@ var canvas = document.getElementsByTagName('canvas')[0];
 var context = canvas.getContext('2d');
 
 var world = [];
-var obj;
+var obj = {};
 var currentScale = 1;
 var offsetX = 0;
 var offsetY = 0;
 function frameClean() {
-  update();
-  world = {};
+  if (world.length > 0) {
+    update();
+  }
+  world = [];
   currentScale = 1;
   offsetX = 0;
   offsetY = 0;
@@ -56,19 +58,17 @@ for (var attributeName in context) {
     // code before each call.
     (function(attributeName) {
       context[attributeName] = function() {
-
-        if (attributeName == "save") {
+        if (hooks[attributeName]) {
+          hooks[attributeName].apply(context, arguments);
+        }
+        if (attributeName == "restore") {
           var caller = arguments.callee.caller.toString()
           var callerIndex = sourceIndex(caller);
           if (!world[callerIndex]) {
             world[callerIndex] = []
           }
-          obj = {};
           world[callerIndex].push(obj);
-        }
-        
-        if (hooks[attributeName]) {
-          hooks[attributeName].apply(context, arguments);
+          obj = {};
         }
         saved[attributeName].apply(context, arguments);
       }
@@ -85,6 +85,7 @@ hooks["translate"] = function(x, y) {
   offsetY += y * currentScale;
 }
 hooks["save"] = function() {
+  obj = {};
   obj.minX = Infinity;
   obj.maxX = -Infinity;
   obj.minY = Infinity;
@@ -111,20 +112,8 @@ hooks["restore"] = function() {
   obj.x = (obj.minX + obj.maxX) / 2;
   obj.y = (obj.minY + obj.maxY) / 2;
   var d = context.lineWidth;
-  context.fillRect(obj.minX - d, obj.minY - d, obj.width + 2 * d, obj.height + 2 * d);
+  context.fillRect(obj.minX - d / 2, obj.minY - d / 2, obj.width + d, obj.height + d);
 
   obj.screenX = (obj.x * currentScale) - offsetX;
   obj.screenY = (obj.y * currentScale) - offsetY;
-}
-
-function update() {
-
-}
-
-function putMouseAngle(angle) {
-  var width = window.innerWidth;
-  var height = window.innerHeight;
-  var x = Math.cos(angle) * width;
-  var y = Math.sin(angle) * width;
-  canvas.onmousemove({clientX: x, clientY: y});
 }
