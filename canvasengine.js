@@ -15,11 +15,20 @@ for (var i = 0; i < 10000; i++) {
   randomColors[i] = getRandomColor();
 }
 
+var sourceIndexCount = 0;
+var sourceIndexes = {};
+function sourceIndex(source) {
+  if (!sourceIndexes[source]) {
+    sourceIndexes[source] = sourceIndexCount++;
+  }
+  return sourceIndexes[source];
+}
+
 
 var canvas = document.getElementsByTagName('canvas')[0];
 var context = canvas.getContext('2d');
 
-var world = {};
+var world = [];
 var obj;
 function frameClean() {
   update();
@@ -43,12 +52,13 @@ for (var attributeName in context) {
       context[attributeName] = function() {
 
         if (attributeName == "save") {
-          caller = arguments.callee.caller.toString()
-          if (!world[caller]) {
-            world[caller] = []
+          var caller = arguments.callee.caller.toString()
+          var callerIndex = sourceIndex(caller);
+          if (!world[callerIndex]) {
+            world[callerIndex] = []
           }
           obj = {};
-          world[caller].push(obj);
+          world[callerIndex].push(obj);
         }
         
         if (hooks[attributeName]) {
