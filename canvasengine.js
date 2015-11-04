@@ -66,12 +66,12 @@ function update() {
 
 function render(obj) {
     var d = context.lineWidth;
-    //context.fillRect(currentObj.minX - d / 2, currentObj.minY - d / 2, currentObj.width + d, currentObj.height + d);
+    context.fillRect(currentObj.minX - d / 2, currentObj.minY - d / 2, currentObj.width + d, currentObj.height + d);
 
-    var mass = Math.round(currentObj.size / 3);
-    if (mass > 10 && mass < 300) {
+    if (currentObj.size > 20 && currentObj.size < (0.9 * Math.min(window.innerHeight, window.innerWidth))) {
+        var mass = Math.round(Math.pow(currentObj.size, 2) / 1000);
         context.globalAlpha = 0.9;
-        context.font = mass + "px Ubuntu";
+        context.font = Math.sqrt(mass) * 10 + "px Ubuntu";
         context.fillStyle = "#FFFFFF";
         context.strokeStyle = "#000000";
         context.lineWidth = 3;
@@ -98,9 +98,9 @@ for (var attributeName in context) {
                 }
                 if (attributeName == "restore") {
                     var caller = arguments.callee.caller.toString()
-                        var callerIndex = sourceIndex(caller);
+                    var callerIndex = sourceIndex(caller);
                     if (!world[callerIndex]) {
-                        world[callerIndex] = []
+                        world[callerIndex] = [];
                     }
                     world[callerIndex].push(currentObj);
                     currentObj = {};
